@@ -37,7 +37,18 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
-    await db.collection("interviews").add(interview);
+  try {
+    // ... generate interview object ...
+    console.log("Attempting to save interview:", JSON.stringify(interview, null, 2)); // Log the object clearly
+    const docRef = await db.collection("interviews").add(interview);
+    console.log("Interview saved successfully with ID:", docRef.id); // Log success
+  
+    return Response.json({ success: true, interviewId: docRef.id }, { status: 200 }); // Return the new ID
+  } catch (error) {
+    console.error("Error during interview generation or saving:", error); // Catch errors from generation OR saving
+    // Check if it's a Firestore-specific error if possible
+    return Response.json({ success: false, error: "Failed to save interview", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+  }
 
     return Response.json({ success: true }, { status: 200 });
   } catch (error) {
